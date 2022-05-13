@@ -1,17 +1,18 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import FormView from './form-view.component';
 import styles from './forms.component.scss';
 import EmptyFormView from './empty-form.component';
-import { ContentSwitcher, Switch, DataTableSkeleton, InlineLoading, Tag } from 'carbon-components-react';
-import { CardHeader, ErrorState, PatientProgram, useVisitOrOfflineVisit } from '@openmrs/esm-patient-common-lib';
+import { ContentSwitcher, Switch, DataTableSkeleton, InlineLoading, InlineNotification } from 'carbon-components-react';
+import { CardHeader, ErrorState, PatientProgram } from '@openmrs/esm-patient-common-lib';
 import { useTranslation } from 'react-i18next';
 import { useForms } from '../hooks/use-forms';
 import { useConfig, useLayoutType, useSession, userHasAccess } from '@openmrs/esm-framework';
 import { isValidOfflineFormEncounter } from '../offline-forms/offline-form-helpers';
 import { ConfigObject } from '../config-schema';
-import { useProgramConfig } from '../hooks/use-program-config';
 import dayjs from 'dayjs';
 import 'dayjs/plugin/isToday';
+import { useRecommendedForms } from '../hooks/useRecommendedForms';
+import ProgramEnrollment from './program-enrollment.component';
 
 const enum FormsCategory {
   Recommended,
@@ -45,20 +46,13 @@ const Forms: React.FC<FormsProps> = ({ patientUuid, patient, pageSize, pageUrl, 
   formsToDisplay = formsToDisplay?.filter((formInfo) =>
     userHasAccess(formInfo.form.encounterType.editPrivilege?.display, session?.user),
   );
-  const { currentVisit } = useVisitOrOfflineVisit(patientUuid);
-  const { programConfigs } = useProgramConfig(patientUuid, showRecommendedFormsTab);
+  const [patientProgram, setPatientProgram] = useState<PatientProgram>();
 
-  const recommendedForms = useMemo(
-    () =>
-      formsToDisplay
-        ?.filter(({ form }) =>
-          Object.values(programConfigs)
-            .flatMap((programConfig) => programConfig.visitTypes)
-            ?.find((visitType) => visitType.uuid === currentVisit?.visitType.uuid)
-            ?.encounterTypes.some(({ uuid }) => uuid === form.encounterType.uuid),
-        )
-        .filter(({ lastCompleted }) => (lastCompleted === undefined ? true : !dayjs(lastCompleted).isToday())),
-    [currentVisit?.visitType.uuid, formsToDisplay, programConfigs],
+  const { recommendedForms, hasCovidScreening } = useRecommendedForms(
+    patientUuid,
+    session?.sessionLocation.uuid,
+    formsToDisplay,
+    patientProgram,
   );
 
   if (!formsToDisplay && !error) {
@@ -94,6 +88,7 @@ const Forms: React.FC<FormsProps> = ({ patientUuid, patient, pageSize, pageUrl, 
         </div>
       </CardHeader>
       <div style={{ width: '100%' }}>
+        <ProgramEnrollment patientUuid={patientUuid} onEnrollmentChange={(e) => setPatientProgram(e)} />
         {formsCategory === FormsCategory.Completed && (
           <FormView
             forms={formsToDisplay.filter(
@@ -119,14 +114,25 @@ const Forms: React.FC<FormsProps> = ({ patientUuid, patient, pageSize, pageUrl, 
         )}
 
         {formsCategory === FormsCategory.Recommended && (
-          <FormView
-            forms={recommendedForms}
-            patientUuid={patientUuid}
-            patient={patient}
-            pageSize={pageSize}
-            pageUrl={pageUrl}
-            urlLabel={urlLabel}
-          />
+          <>
+            {hasCovidScreening && (
+              <InlineNotification
+                style={{ minWidth: '100%', margin: '0rem', padding: '0rem' }}
+                kind={'info'}
+                lowContrast
+                subtitle={t('accessClinicalForm', 'To access clinician forms kindly fill Covid 19 Assessment Form')}
+                title={t('covidScreening', 'Covid screening')}
+              />
+            )}
+            <FormView
+              forms={recommendedForms}
+              patientUuid={patientUuid}
+              patient={patient}
+              pageSize={pageSize}
+              pageUrl={pageUrl}
+              urlLabel={urlLabel}
+            />
+          </>
         )}
       </div>
     </div>

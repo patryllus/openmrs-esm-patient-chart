@@ -1,5 +1,7 @@
 {
+  "accessClinicalForm": "To access clinician forms kindly fill Covid 19 Assessment Form",
   "clinicalForm": "Clinical form",
+  "covidScreening": "Covid screening",
   "form": "Form",
   "formName": "Form Name (A-Z)",
   "forms": "Forms",
