@@ -1,4 +1,6 @@
-import { useLayoutType } from '@openmrs/esm-framework';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { mutate } from 'swr';
 import {
   DataTable,
   TableContainer,
@@ -14,14 +16,12 @@ import {
   DataTableRow,
   Toggle,
   SkeletonPlaceholder,
-} from 'carbon-components-react';
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+} from '@carbon/react';
+import { useLayoutType } from '@openmrs/esm-framework';
 import { FormEncounter } from '../types';
 import { useOfflineFormManagement } from './use-offline-form-management';
-import styles from './offline-forms.styles.scss';
 import { useValidOfflineFormEncounters } from './use-offline-form-encounters';
-import { mutate } from 'swr';
+import styles from './offline-forms.styles.scss';
 
 export interface OfflineFormsProps {
   canMarkFormsAsOffline: boolean;

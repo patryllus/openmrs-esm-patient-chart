@@ -1,12 +1,8 @@
 import React from 'react';
-import Add16 from '@carbon/icons-react/es/add/16';
+import { useTranslation } from 'react-i18next';
 import filter from 'lodash-es/filter';
 import includes from 'lodash-es/includes';
 import map from 'lodash-es/map';
-import styles from './programs-detailed-summary.scss';
-import { CardHeader, EmptyState, ErrorState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
-import { useTranslation } from 'react-i18next';
-import { useAvailablePrograms, useEnrollments } from './programs.resource';
 import {
   Button,
   DataTable,
@@ -22,8 +18,12 @@ import {
   DataTableHeader,
   DataTableRow,
   InlineNotification,
-} from 'carbon-components-react';
+} from '@carbon/react';
+import { Add } from '@carbon/react/icons';
 import { formatDate, formatDatetime } from '@openmrs/esm-framework';
+import { CardHeader, EmptyState, ErrorState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
+import { useAvailablePrograms, useEnrollments } from './programs.resource';
+import styles from './programs-detailed-summary.scss';
 
 interface ProgramsDetailedSummaryProps {
   patientUuid: string;
@@ -88,7 +88,7 @@ const ProgramsDetailedSummary: React.FC<ProgramsDetailedSummaryProps> = ({ patie
           <span>{isValidating ? <InlineLoading /> : null}</span>
           <Button
             kind="ghost"
-            renderIcon={Add16}
+            renderIcon={(props) => <Add size={16} {...props} />}
             iconDescription="Add programs"
             onClick={launchProgramsForm}
             disabled={availablePrograms?.length && eligiblePrograms?.length === 0}
@@ -106,7 +106,7 @@ const ProgramsDetailedSummary: React.FC<ProgramsDetailedSummaryProps> = ({ patie
               title={t('fullyEnrolled', 'Enrolled in all programs')}
             />
           )}
-          <DataTable rows={tableRows} headers={tableHeaders} isSortable={true} size="short">
+          <DataTable rows={tableRows} headers={tableHeaders} isSortable={true} size="sm">
             {({ rows, headers, getHeaderProps, getTableProps }) => (
               <Table {...getTableProps()} useZebraStyles>
                 <TableHead>

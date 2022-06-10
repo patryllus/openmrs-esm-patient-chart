@@ -1,24 +1,24 @@
-import { navigate } from '@openmrs/esm-framework';
-import { Tile, Button, SkeletonText } from 'carbon-components-react';
 import React, { ReactNode } from 'react';
-import styles from './offline-forms-overview-card.styles.scss';
-import ArrowRight16 from '@carbon/icons-react/es/arrow--right/16';
 import { useTranslation } from 'react-i18next';
-import { useValidOfflineFormEncounters } from './use-offline-form-encounters';
 import useSWR from 'swr';
+import { Tile, Button, SkeletonText } from '@carbon/react';
+import { ArrowRight } from '@carbon/react/icons';
+import { navigate } from '@openmrs/esm-framework';
+import { useValidOfflineFormEncounters } from './use-offline-form-encounters';
 import { isFormFullyCached } from './offline-form-helpers';
+import styles from './offline-forms-overview-card.styles.scss';
 
 const OfflineFormsOverviewCard: React.FC = () => {
   const { t } = useTranslation();
   const { data: availableFormsCount, error } = useCountOfFormsAvailableOffline();
 
   return (
-    <Tile light className={`${styles.overviewCard}`}>
+    <Tile className={styles.overviewCard}>
       <div className={styles.headerContainer}>
         <h3 className={styles.productiveHeading01}>Forms</h3>
         <Button
           kind="ghost"
-          renderIcon={ArrowRight16}
+          renderIcon={(props) => <ArrowRight size={16} {...props} />}
           size="sm"
           onClick={() => navigate({ to: `\${openmrsSpaBase}/offline-tools/forms` })}
         >

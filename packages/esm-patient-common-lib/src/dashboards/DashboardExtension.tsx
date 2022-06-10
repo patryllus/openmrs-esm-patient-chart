@@ -9,7 +9,7 @@ export interface DashboardExtensionProps {
 export const DashboardExtension = ({ title, basePath }: DashboardExtensionProps) => {
   return (
     <div key={title}>
-      <ConfigurableLink to={`${basePath}/${encodeURIComponent(title)}`} className="bx--side-nav__link">
+      <ConfigurableLink to={`${basePath}/${encodeURIComponent(title)}`} className="cds--side-nav__link">
         {title}
       </ConfigurableLink>
     </div>

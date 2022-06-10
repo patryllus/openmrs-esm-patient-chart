@@ -1,10 +1,9 @@
 import React, { SyntheticEvent } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSWRConfig } from 'swr';
+import debounce from 'lodash-es/debounce';
 import dayjs from 'dayjs';
 import 'dayjs/plugin/utc';
-import debounce from 'lodash-es/debounce';
-import { useSWRConfig } from 'swr';
-import styles from './conditions-form.scss';
-import { useTranslation } from 'react-i18next';
 import {
   createErrorHandler,
   fhirBaseUrl,
@@ -14,20 +13,22 @@ import {
   useSession,
 } from '@openmrs/esm-framework';
 import {
-  Tile,
-  SearchSkeleton,
-  Search,
   Button,
-  RadioButtonGroup,
-  RadioButton,
-  FormGroup,
-  Form,
-  DatePickerInput,
-  DatePicker,
   ButtonSet,
-} from 'carbon-components-react';
+  DatePicker,
+  DatePickerInput,
+  Form,
+  FormGroup,
+  Layer,
+  RadioButton,
+  RadioButtonGroup,
+  Search,
+  SearchSkeleton,
+  Tile,
+} from '@carbon/react';
 import { createPatientCondition, searchConditionConcepts, CodedCondition } from './conditions.resource';
 import { DefaultWorkspaceProps } from '@openmrs/esm-patient-common-lib';
+import styles from './conditions-form.scss';
 
 const searchTimeoutInMs = 500;
 
@@ -163,7 +164,7 @@ const ConditionsForm: React.FC<DefaultWorkspaceProps> = ({ closeWorkspace, patie
         <FormGroup legendText={t('condition', 'Condition')}>
           <Search
             light={isTablet}
-            size="xl"
+            size="lg"
             id="conditionsSearch"
             labelText={t('enterCondition', 'Enter condition')}
             placeholder={t('searchConditions', 'Search conditions')}
@@ -199,11 +200,23 @@ const ConditionsForm: React.FC<DefaultWorkspaceProps> = ({ closeWorkspace, patie
                 );
               }
               return (
-                <Tile light={isTablet} className={styles.emptyResults}>
-                  <span>
-                    {t('noResultsFor', 'No results for')} <strong>"{searchTerm}"</strong>
-                  </span>
-                </Tile>
+                <>
+                  {isTablet ? (
+                    <Layer>
+                      <Tile className={styles.emptyResults}>
+                        <span>
+                          {t('noResultsFor', 'No results for')} <strong>"{searchTerm}"</strong>
+                        </span>
+                      </Tile>
+                    </Layer>
+                  ) : (
+                    <Tile className={styles.emptyResults}>
+                      <span>
+                        {t('noResultsFor', 'No results for')} <strong>"{searchTerm}"</strong>
+                      </span>
+                    </Tile>
+                  )}
+                </>
               );
             })()}
           </div>
