@@ -9,6 +9,13 @@ import { formatDate, useConfig } from '@openmrs/esm-framework';
 import { useObs } from '../resources/useObs';
 import styles from './obs-graph.scss';
 
+enum ScaleTypes {
+  TIME = 'time',
+  LINEAR = 'linear',
+  LOG = 'log',
+  LABELS = 'labels',
+}
+
 interface ConceptDescriptor {
   label: string;
   uuid: string;
@@ -42,7 +49,7 @@ const ObsGraph: React.FC<ObsGraphProps> = ({ patientUuid }) => {
 
   const chartColors = Object.fromEntries(config.data.map((d) => [d.label, d.color]));
 
-  const chartOptions: LineChartOptions = {
+  const chartOptions = {
     axes: {
       bottom: {
         title: 'Date',

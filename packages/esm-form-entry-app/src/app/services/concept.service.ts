@@ -1,8 +1,7 @@
 import { forkJoin as observableForkJoin, of as observableOf, Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-
-import * as _ from 'lodash';
+import each from 'lodash-es/each';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { WindowRef } from '../window-ref';
 
@@ -33,7 +32,7 @@ export class ConceptService {
 
   public searchBulkConceptByUUID(conceptUuids: any, lang: string) {
     const observablesArray = [];
-    _.each(conceptUuids, (conceptUuid) => {
+    each(conceptUuids, (conceptUuid) => {
       observablesArray.push(
         this.searchConceptByUUID(conceptUuid, lang).pipe(
           map((concept) => {

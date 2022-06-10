@@ -6,7 +6,7 @@ import {
   defineExtensionConfigSchema,
 } from '@openmrs/esm-framework';
 import { createDashboardLink } from '@openmrs/esm-patient-common-lib';
-import { capitalize } from 'lodash-es';
+import capitalize from 'lodash-es/capitalize';
 import { esmPatientChartSchema } from './config-schema';
 import { moduleName, spaBasePath } from './constants';
 import { setupCacheableRoutes, setupOfflineVisitsSync } from './offline';

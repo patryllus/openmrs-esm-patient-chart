@@ -7,9 +7,9 @@ import { withUnit } from '@openmrs/esm-patient-common-lib';
 import { ConfigObject } from '../config-schema';
 import { PatientVitals } from './vitals.resource';
 import styles from './vitals-chart.scss';
-import '@carbon/charts/styles.css';
+// import '@carbon/charts/styles.css';
 
-export enum ScaleTypes {
+enum ScaleTypes {
   LABELS = 'labels',
   LABELS_RATIO = 'labels-ratio',
   LINEAR = 'linear',
