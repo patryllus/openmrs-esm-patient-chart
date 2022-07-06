@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 
 import { forkJoin, Observable, of, from } from 'rxjs';
 import { catchError, map, mergeMap } from 'rxjs/operators';
-import { EncounterAdapter, PersonAttribuAdapter, Form } from '@ampath-kenya/ngx-formentry';
+import { EncounterAdapter, PersonAttribuAdapter, Form, PersonIdentifierAdapter } from '@ampath-kenya/ngx-formentry';
 import { EncounterResourceService } from '../openmrs-api/encounter-resource.service';
 import { PersonResourceService } from '../openmrs-api/person-resource.service';
 import { FormDataSourceService } from '../form-data-source/form-data-source.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Person, PersonUpdate, EncounterCreate, Encounter } from '../types';
+import { Person, PersonUpdate, EncounterCreate, Encounter, PersonIdentifier, PersonIdentifiers } from '../types';
 import {
   findQueuedPatientFormSyncItemByContentId,
   PatientFormSyncItemContent,
@@ -19,6 +19,7 @@ import { mutateEncounterCreateToPartialEncounter } from '../offline/syncItemMuta
 import { SingleSpaPropsService } from '../single-spa-props/single-spa-props.service';
 import { v4 } from 'uuid';
 import { NodeBase } from '@ampath-kenya/ngx-formentry/form-entry/form-factory/form-node';
+import { PatientResourceService } from '../openmrs-api/patient-resource.service';
 
 /**
  * The result of submitting a form via the {@link FormSubmissionService.submitPayload} function.
@@ -32,6 +33,8 @@ export class FormSubmissionService {
   constructor(
     private readonly encounterAdapter: EncounterAdapter,
     private readonly personAttributeAdapter: PersonAttribuAdapter,
+    private readonly personIdentifierAdapter: PersonIdentifierAdapter,
+    private readonly patientResourceService: PatientResourceService,
     private readonly encounterResourceService: EncounterResourceService,
     private readonly personResourceService: PersonResourceService,
     private readonly formDataSourceService: FormDataSourceService,
@@ -53,10 +56,13 @@ export class FormSubmissionService {
 
         const encounterCreate = this.buildEncounterPayload(form);
         const personUpdate = this.buildPersonUpdatePayload(form);
+        const identifierCreate = this.buildPersonIdentifierPayload(form);
+
+        console.log('I am here', identifierCreate);
 
         return isOfflineSubmission
           ? this.submitPayloadOffline(form, encounterCreate, personUpdate, syncItem?.content._id)
-          : this.submitPayloadOnline(encounterCreate, personUpdate);
+          : this.submitPayloadOnline(encounterCreate, personUpdate, identifierCreate);
       }),
     );
   }
@@ -102,10 +108,12 @@ export class FormSubmissionService {
   private submitPayloadOnline(
     encounterCreate: EncounterCreate,
     personUpdate: PersonUpdate,
+    identifierCreate: PersonIdentifiers,
   ): Observable<FormSubmissionResult> {
     return forkJoin({
       encounter: this.submitEncounter(encounterCreate),
       person: this.submitPersonUpdate(personUpdate),
+      identifiers: this.submitPersonIdentifier(identifierCreate),
     });
   }
 
@@ -132,6 +140,20 @@ export class FormSubmissionService {
 
     return this.personResourceService
       .saveUpdatePerson(personUpdate.uuid!, personUpdate)
+      .pipe(catchError((res) => this.throwUserFriendlyError(res)));
+  }
+
+  private submitPersonIdentifier(personIdentifier: PersonIdentifiers): Observable<Person | undefined> {
+    if (!personIdentifier) {
+      return of(undefined);
+    }
+
+    return this.patientResourceService
+      .saveUpdatePatientIdentifier(
+        personIdentifier.person!,
+        personIdentifier.identifiers[0].identifierType,
+        personIdentifier.identifiers[0],
+      )
       .pipe(catchError((res) => this.throwUserFriendlyError(res)));
   }
 
@@ -165,8 +187,37 @@ export class FormSubmissionService {
     if (isEmpty(attributes)) {
       return undefined;
     }
+    return { uuid: form.valueProcessingInfo.personUuid, attributes };
+  }
 
-    return { uuid: form.valueProcessingInfo.personUuid, attributes: attributes };
+  private buildPersonIdentifierPayload(form: Form): PersonIdentifiers | undefined {
+    let locationAttribute;
+
+    if (!form.valueProcessingInfo.personUuid) {
+      throw new Error(
+        'The form is missing a required value for submitting person identifiers: form.valueProcessingInfo.personUuid',
+      );
+    }
+    let identifiersPayload = [];
+    let identifierObject: any = this.personIdentifierAdapter.generateFormPayload(form);
+    // identifierObject.location = '8798bebb-6636-49c6-a341-1a9717583140';
+    identifierObject.preferred = false;
+    identifiersPayload.push({
+      identifier: identifierObject.value,
+      identifierType: identifierObject.identifierType,
+    });
+    console.log('identifier object', identifierObject);
+    let patientIdentifiers: PersonIdentifier[] = identifiersPayload;
+    if (isEmpty(patientIdentifiers)) {
+      return undefined;
+    }
+
+    let identifiers: any = {
+      person: form.valueProcessingInfo.personUuid,
+      identifiers: patientIdentifiers,
+    };
+
+    return identifiers;
   }
 
   // TODO: Should this function be extracted?

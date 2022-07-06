@@ -339,3 +339,14 @@ export interface PersonUpdate {
   uuid?: string;
   attributes: Array<PersonAttribute>;
 }
+export interface PersonIdentifiers {
+  person?: string;
+  identifiers: Array<PersonIdentifier>;
+}
+
+export interface PersonIdentifier {
+  identifierType: string;
+  identifier: string;
+  location: string;
+  preferred: boolean;
+}

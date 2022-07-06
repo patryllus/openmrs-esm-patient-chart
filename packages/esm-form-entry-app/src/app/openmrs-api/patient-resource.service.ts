@@ -56,7 +56,7 @@ export class PatientResourceService {
     if (!payload || !uuid) {
       return null;
     }
-    const url = this.getUrl() + '/' + uuid + '/' + 'identifier' + '/' + identifierUuid;
+    const url = this.getUrl() + '/' + uuid + '/' + 'identifier';
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.post(url, JSON.stringify(payload), { headers }).pipe(
       map((response: any) => {
