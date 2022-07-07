@@ -203,7 +203,7 @@ export class FormSubmissionService {
     // identifierObject.location = '8798bebb-6636-49c6-a341-1a9717583140';
     identifierObject.preferred = false;
     identifiersPayload.push({
-      identifier: identifierObject.value,
+      identifier: identifierObject.identifier,
       identifierType: identifierObject.identifierType,
     });
     console.log('identifier object', identifierObject);
