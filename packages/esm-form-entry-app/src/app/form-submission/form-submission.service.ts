@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from '@angular/core';
 
 import { forkJoin, Observable, of, from } from 'rxjs';
@@ -57,8 +58,7 @@ export class FormSubmissionService {
         const encounterCreate = this.buildEncounterPayload(form);
         const personUpdate = this.buildPersonUpdatePayload(form);
         const identifierCreate = this.buildPersonIdentifierPayload(form);
-
-        console.log('I am here', identifierCreate);
+       
 
         return isOfflineSubmission
           ? this.submitPayloadOffline(form, encounterCreate, personUpdate, syncItem?.content._id)
@@ -206,7 +206,7 @@ export class FormSubmissionService {
       identifier: identifierObject.identifier,
       identifierType: identifierObject.identifierType,
     });
-    console.log('identifier object', identifierObject);
+     
     let patientIdentifiers: PersonIdentifier[] = identifiersPayload;
     if (isEmpty(patientIdentifiers)) {
       return undefined;
